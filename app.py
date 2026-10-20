@@ -1,7 +1,7 @@
 import streamlit as st
-st.set_page_config(page_title = "美甲AI营销",page_icon = "💅",layout = "wide")
 import requests
-
+import json
+st.set_page_config(page_title = "美甲AI营销",page_icon = "💅",layout = "wide")
 # 设置网页标题
 with st.sidebar:
     st.header("关于本工具")
@@ -9,11 +9,9 @@ with st.sidebar:
 st.title("美甲店 AI 营销助手 💅")
 st.write("欢迎老板！我是您的专属营销大师，输入款式，立刻为您生成爆款文案。")
 #假如AI的回答存入了 answer 变量
-if st.button("复制文案"):
-    st.code(answer) #用代码框显示，右上角自带一个一键复制按钮
 
 # 你的智谱 API Key
-api_key = "f979c970ff634b218a3583c337f78b33.0v3v2N7cZDzqSFOW"
+api_key = st.secrets["ZHIPU_API_KEY"]
 
 # 1. 网页上的下拉菜单（选择文案类型）
 style_type = st.selectbox(
