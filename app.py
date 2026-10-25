@@ -2,56 +2,78 @@ import streamlit as st
 import requests
 import json
 
-st.set_page_config(page_title="美甲AI聊天助手", page_icon="💬", layout="wide")
-st.title("美甲店 AI 专属顾问 💬")
+# 1. 网页全局设置
+st.set_page_config(page_title="美甲AI营销助手", page_icon="💅", layout="wide")
 
-# 从保险箱里拿密钥
-api_key = st.secrets["ZHIPU_API_KEY"]
+# 2. 侧边栏
+with st.sidebar:
+    st.header("👑 CEO 专属 AI 营销总监")
+    st.write("本工具由13岁独立开发者打造。")
+    st.write("专为美甲店老板一键生成小红书、朋友圈爆款文案，省下每月几千块的文案策划费。每天发3~5条朋友圈，吸引海量用户！")
+    st.divider()
+    st.caption("版本：v1.0 测试版")
 
-# 1. 初始化“记忆盒子”（如果网页第一次打开，里面是空的，就给它塞一个默认提示）
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "system", "content": "你是一个专业的美甲店营销顾问，请用亲切、活泼的语气回答老板的问题。"}
-    ]
+# 3. 主体界面
+st.title("美甲店 AI 营销助手 💅")
+st.write("欢迎老板！我是您的专属营销大师。")
 
-# 2. 把之前的聊天记录全部显示在网页上（就像微信聊天界面）
-for msg in st.session_state.messages:
-    if msg["role"] != "system": # 系统的默认提示不显示给用户看
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+# 4. 创建标签页
+tab1, tab2 = st.tabs(["🚀 小红书生成器", "📝 企业定制/联系老板 (开发中)"])
 
-# 3. 在网页最下面生成一个聊天输入框
-user_input = st.chat_input("请问老板，有什么我可以帮您的？")
+with tab1:
+    # 5. 左右分栏：左边输入，右边输出
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.subheader("👈 输入需求")
+        style_type = st.selectbox(
+            "选择文案类型：",
+            ("小红书种草文案", "朋友圈促销文案", "霸气开业宣传语")
+        )
+        user_input = st.text_input("输入美甲款式（例如：法式、猫眼）：")
+        #新加的：让老板自己填价格
+        original_price = st.text_input("原价(如：158):",value="158")
+        promo_price = st.text_input("活动价(如:99):",value="99")
+        generate_btn = st.button("一键生成文案 ✨", use_container_width=True)
+        
+    with col2:
+        st.subheader("👉 AI 生成结果")
+        if generate_btn and user_input:
+            with st.spinner("AI 正在疯狂码字中..."):
+                
+                # 1. 商业防呆逻辑：判断用户到底有没有填价格
+                if original_price and promo_price:
+                    price_text = f"必须在文案中明确写出：原价 {original_price} 元，现在限时活动价只要 {promo_price} 元！"
+                else:
+                    price_text = "文案中不要提及任何具体价格，重点突出款式的美感和设计。"
 
-# 4. 如果用户打字并回车了
-if user_input:
-    # 先把你（用户）的话显示在屏幕上
-    with st.chat_message("user"):
-        st.markdown(user_input)
-    # 把你这句话存入记忆盒子
-    st.session_state.messages.append({"role": "user", "content": user_input})
+                # 2. 把判断结果放进提示词里
+                prompt = f"你是一个顶尖的美甲店营销专家。请帮我为【{user_input}】款式写一段【{style_type}】。要求：语气吸引人，多用emoji，字数在150字左右。{price_text}"
+                
+                # 3. 发送请求
+                url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {st.secrets['ZHIPU_API_KEY']}",
+                    "Content-Type": "application/json"
+                }
+                data = {
+                    "model": "glm-4-flash",
+                    "messages": [{"role": "user", "content": prompt}]
+                }
+                payload = json.dumps(data, ensure_ascii=False).encode('utf-8')
+                response = requests.post(url, headers=headers, data=payload)
+                result = response.json()
+                
+                if 'choices' in result:
+                    answer = result['choices'][0]['message']['content']
+                    st.success("文案生成完毕！直接复制带走：")
+                    st.info(answer)
+                else:
+                    st.error(f"出错了：{result}")
+        elif generate_btn and not user_input:
+            st.warning("老板，您还没输入款式呢！")
+        else:
+            st.info("请在左侧输入需求，点击生成。")
 
-    # 5. 呼叫 AI 大脑
-    with st.chat_message("assistant"):
-        with st.spinner("顾问思考中..."):
-            url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            }
-            # 把整个记忆盒子（包括你刚说的话和之前的聊天记录）都发给AI
-            data = {
-                "model": "glm-4-flash",
-                "messages": st.session_state.messages
-            }
-            payload = json.dumps(data, ensure_ascii=False).encode('utf-8')
-            response = requests.post(url, headers=headers, data=payload)
-            result = response.json()
-
-            # 6. 拿到回答，显示出来，并存进记忆盒子
-            if 'choices' in result:
-                ai_reply = result['choices'][0]['message']['content']
-                st.markdown(ai_reply)
-                st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-            else:
-                st.error(f"出错了：{result}")
+with tab2:
+    st.write("企业定制目录，敬请期待！")
