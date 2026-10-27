@@ -68,6 +68,7 @@ with tab1:
                     answer = result['choices'][0]['message']['content']
                     st.success("文案生成完毕！直接复制带走：")
                     st.info(answer)
+                    st.snow()
                 else:
                     st.error(f"出错了：{result}")
         elif generate_btn and not user_input:
