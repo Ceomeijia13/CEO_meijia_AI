@@ -28,7 +28,10 @@ with tab1:
         st.subheader("👈 输入需求")
         style_type = st.selectbox(
             "选择文案类型：",
-            ("小红书种草文案", "朋友圈促销文案", "霸气开业宣传语")
+            ("小红书种草文案","朋友圈促销文案", "霸气开业宣传语")
+        )
+        tone_type = st.selectbot(
+        "选择文案语气：",("热情闺蜜风","高冷高级风","搞笑幽默风")
         )
         user_input = st.text_input("输入美甲款式（例如：法式、猫眼）：")
         #新加的：让老板自己填价格
@@ -49,7 +52,7 @@ with tab1:
                     price_text = "文案中不要提及任何具体价格，重点突出款式的美感和设计。"
 
                 # 2. 把判断结果放进提示词里
-                prompt = f"你是一个顶尖的美甲店营销专家。请帮我为【{user_input}】款式写一段【{style_type}】。要求：语气吸引人，多用emoji，字数在150字左右。{price_text}"
+                prompt = f"你是一个顶尖的美甲店营销专家。请帮我为【{user_input}】款式写一段【{style_type}】。要求：语气使用{tone_type}，多用emoji，字数在150字左右。{price_text}"
                 
                 # 3. 发送请求
                 url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
@@ -68,8 +71,8 @@ with tab1:
                 if 'choices' in result:
                     answer = result['choices'][0]['message']['content']
                     st.success("文案生成完毕！直接复制带走：")
-                    st.info(answer)
-                    st.snow()
+                    st.code(answer,language="markdown")
+                st.snow()
                 else:
                     st.error(f"出错了：{result}")
         elif generate_btn and not user_input:
