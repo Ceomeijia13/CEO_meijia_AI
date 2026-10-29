@@ -72,7 +72,7 @@ with tab1:
                     answer = result['choices'][0]['message']['content']
                     st.success("文案生成完毕！直接复制带走：")
                     st.code(answer,language="markdown")
-                st.snow()
+                    st.snow()
                 else:
                     st.error(f"出错了：{result}")
         elif generate_btn and not user_input:
