@@ -35,7 +35,7 @@ with tab1:
         )
         user_input = st.text_input("输入美甲款式（例如：法式、猫眼）：")
         #新加的：让老板自己填价格
-    with st.expander("高级设置：添加促销价格(可选)"):
+    with st.expander("高级设置：添加促销价格(可选)一键生成"):
         original_price = st.text_input("原价（如：158）:",value="")
         promo_price = st.text_input("活动价（如：99）：",value="")
         generate_btn = st.button("一键生成文案 ✨", use_container_width=True)
