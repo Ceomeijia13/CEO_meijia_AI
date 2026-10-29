@@ -30,7 +30,7 @@ with tab1:
             "选择文案类型：",
             ("小红书种草文案","朋友圈促销文案", "霸气开业宣传语")
         )
-        tone_type = st.selectbot(
+        tone_type = st.selectbox(
         "选择文案语气：",("热情闺蜜风","高冷高级风","搞笑幽默风")
         )
         user_input = st.text_input("输入美甲款式（例如：法式、猫眼）：")
