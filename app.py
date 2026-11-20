@@ -4,7 +4,11 @@ import json
 
 # ================= 1. 页面全局设置 =================
 st.set_page_config(page_title="美甲AI营销助手", page_icon="💅", layout="wide")
-
+# 初始化数据
+if 'count' not in st.session_state:
+    st.session_state.count = 0  # 今日生成篇数
+if 'money' not in st.session_state:
+    st.session_state.money = 0  # 累计省下的钱
 # ================= 2. 侧边栏 =================
 with st.sidebar:
     st.header("👑 CEO 专属 AI 营销总监")
@@ -15,6 +19,12 @@ with st.sidebar:
 
 # ================= 3. 主体界面 =================
 st.title("美甲店 AI 营销助手 💅")
+# 顶部数据看板
+col_m1, col_m2 = st.columns(2)
+with col_m1:
+    st.metric(label="今日已生成文案", value=f"{st.session_state.count} 篇")
+with col_m2:
+    st.metric(label="累计为你省下文案费", value=f"¥ {st.session_state.money}")
 st.write("欢迎老板！我是您的专属营销大师。")
 
 # 创建标签页
@@ -108,9 +118,15 @@ with tab1:
                 
                 if 'choices' in result:
                     answer = result['choices'][0]['message']['content']
+                    
+                    # ====== 新增的两行：一旦生成成功，数字自动增加 ======
+                    st.session_state.count += 1
+                    st.session_state.money += 50 # 假设每写一篇，帮老板省了50元外包费
+                    # ==================================================
+                    
                     st.success("文案生成完毕！直接复制带走：")
-                    # 一键复制代码块
                     st.code(answer, language="markdown")
+                    answer = result['choices'][0]['message']['content']
                     # 下雪特效
                     st.snow()
                 else:
